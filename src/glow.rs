@@ -285,7 +285,7 @@ unsafe extern "system" fn wndproc(hwnd: HWND, msg: u32, wparam: WPARAM, lparam: 
 impl Glow {
     pub fn new() -> Glow {
         static REGISTER: Once = Once::new();
-        let class = w!("TwoCodeGlow");
+        let class = w!("LintelGlow");
         let hwnd = unsafe {
             let instance = GetModuleHandleW(PCWSTR::null()).unwrap_or_default();
             REGISTER.call_once(|| {
@@ -293,7 +293,7 @@ impl Glow {
             });
             // Layered and transparent: Windows sends every click and hover to whatever is underneath.
             let style = WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE | WS_EX_NOREDIRECTIONBITMAP | WS_EX_LAYERED | WS_EX_TRANSPARENT;
-            let hwnd = CreateWindowExW(style, class, w!("TwoCode glow"), WS_POPUP, 0, 0, 10, 10, None, None, Some(instance.into()), None).unwrap_or_default();
+            let hwnd = CreateWindowExW(style, class, w!("Lintel glow"), WS_POPUP, 0, 0, 10, 10, None, None, Some(instance.into()), None).unwrap_or_default();
             let _ = SetLayeredWindowAttributes(hwnd, COLORREF(0), 255, LWA_ALPHA);
             hwnd
         };

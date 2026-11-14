@@ -219,7 +219,7 @@ mod tests {
 
     #[test]
     fn follows_a_growing_file_and_waits_for_whole_lines() {
-        let dir = std::env::temp_dir().join(format!("twocode-test-{}", agents::now_ms()));
+        let dir = std::env::temp_dir().join(format!("lintel-test-{}", agents::now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let path = dir.join("abc.jsonl");
         fs::write(&path, "{\"type\":\"user\",\"cwd\":\"C:\\\\dev\\\\shop\",\"message\":{\"content\":\"go\"}}\n{\"type\":\"assis").unwrap();
@@ -240,7 +240,7 @@ mod tests {
 
     #[test]
     fn old_files_are_skipped_at_startup_but_followed_after() {
-        let dir = std::env::temp_dir().join(format!("twocode-test2-{}", agents::now_ms()));
+        let dir = std::env::temp_dir().join(format!("lintel-test2-{}", agents::now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let path = dir.join("rollout-2026-01-01T00-00-00-01a19066-95db-7f70-9059-15afcb2686f5.jsonl");
         let file = File::create(&path).unwrap();

@@ -582,7 +582,7 @@ impl Hub {
         } else if allow {
             serde_json::json!({ "behavior": "allow", "updatedInput": hold.input })
         } else {
-            serde_json::json!({ "behavior": "deny", "message": "Denied from TwoCode." })
+            serde_json::json!({ "behavior": "deny", "message": "Denied from Lintel." })
         };
         let body = serde_json::json!({ "hookSpecificOutput": { "hookEventName": "PermissionRequest", "decision": decision } });
         (hold.responder)(Some(body.to_string()));
@@ -1176,7 +1176,7 @@ mod tests {
 
     #[test]
     fn folders_are_named_from_their_repo() {
-        let root = std::env::temp_dir().join(format!("twocode-label-{}", std::process::id()));
+        let root = std::env::temp_dir().join(format!("lintel-label-{}", std::process::id()));
         let shop = root.join("shop");
         let deep = shop.join("native").join("src");
         std::fs::create_dir_all(&deep).unwrap();
@@ -1187,8 +1187,8 @@ mod tests {
 
         let worktree = root.join("feature-a").join("src");
         std::fs::create_dir_all(&worktree).unwrap();
-        std::fs::write(root.join("feature-a").join(".git"), "gitdir: C:/dev/TwoCode/.git/worktrees/feature-a\n").unwrap();
-        assert_eq!(repo_name(&worktree.to_string_lossy()).as_deref(), Some("TwoCode"));
+        std::fs::write(root.join("feature-a").join(".git"), "gitdir: C:/dev/Lintel/.git/worktrees/feature-a\n").unwrap();
+        assert_eq!(repo_name(&worktree.to_string_lossy()).as_deref(), Some("Lintel"));
         assert_eq!(repo_name("Z:\\no\\such\\folder"), None);
         std::fs::remove_dir_all(&root).unwrap();
     }

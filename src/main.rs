@@ -1,5 +1,5 @@
 #![windows_subsystem = "windows"]
-//! TwoCode: a notch at the top of the screen for your media and your coding agents.
+//! Lintel: a notch at the top of the screen for your media and your coding agents.
 mod agents;
 mod audio;
 mod bluetooth;
@@ -1176,7 +1176,7 @@ fn main() {
     }
     unsafe {
         // One notch is enough: a second start just leaves.
-        let single = CreateMutexW(None, true, w!("Local\\TwoCodeNotch"));
+        let single = CreateMutexW(None, true, w!("Local\\LintelNotch"));
         if single.is_err() || GetLastError() == ERROR_ALREADY_EXISTS {
             return;
         }
@@ -1184,10 +1184,10 @@ fn main() {
         let _ = SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
         let instance = GetModuleHandleW(PCWSTR::null()).expect("own module");
-        let class = w!("TwoCodeNotch");
+        let class = w!("LintelNotch");
         RegisterClassW(&WNDCLASSW { lpfnWndProc: Some(wndproc), hInstance: instance.into(), lpszClassName: class, ..Default::default() });
         let style = WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE | WS_EX_NOREDIRECTIONBITMAP;
-        let hwnd = CreateWindowExW(style, class, w!("TwoCode"), WS_POPUP, 0, 0, 10, 10, None, None, Some(instance.into()), None).expect("the notch window");
+        let hwnd = CreateWindowExW(style, class, w!("Lintel"), WS_POPUP, 0, 0, 10, 10, None, None, Some(instance.into()), None).expect("the notch window");
         WINDOW.store(hwnd.0 as isize, Ordering::SeqCst);
 
         let config = Config::load();

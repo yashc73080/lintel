@@ -1,5 +1,5 @@
 [package]
-name = "twocode"
+name = "lintel"
 version = "2.0.0-alpha.1"
 edition = "2021"
 description = "A native Windows notch that shows your media and your Claude Code and Codex sessions."
@@ -9,7 +9,6 @@ serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
 notify = { version = "6", default-features = false }
 windows-core = "0.62"
-windows-future = "0.3"
 windows-numerics = "0.3"
 windows = { version = "0.62", features = [
   "Devices_Bluetooth",

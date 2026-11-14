@@ -10,7 +10,7 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 const PORT: u16 = 47823;
-const ROUTE: &str = "/twocode-hook";
+const ROUTE: &str = "/lintel-hook";
 const EVENTS: [&str; 6] = ["UserPromptSubmit", "PostToolUse", "PostToolUseFailure", "PermissionRequest", "Stop", "SessionEnd"];
 const PERMISSION_WAIT_S: u64 = 300;
 const MAX_BODY: usize = 1_000_000;
@@ -47,7 +47,7 @@ pub fn token(dir: &Path) -> String {
 pub fn serve(hub: Arc<Mutex<Hub>>, secret: String, on_change: impl Fn() + Send + Sync + 'static) {
     let on_change = Arc::new(on_change);
     std::thread::spawn(move || {
-        // Taken: another copy (or the old TwoCode) has the port. Tracking still works from the transcripts.
+        // Taken: another copy has the port. Tracking still works from the transcripts.
         let Ok(listener) = TcpListener::bind(("127.0.0.1", PORT)) else { return };
         for stream in listener.incoming().flatten() {
             let (hub, secret, on_change) = (hub.clone(), secret.clone(), on_change.clone());
@@ -169,7 +169,7 @@ fn read_request(stream: &mut TcpStream, secret: &str) -> Option<(Vec<u8>, Agent)
     let (mut given, mut length) = ("", 0usize);
     for line in lines {
         let (name, value) = line.split_once(':')?;
-        if name.eq_ignore_ascii_case("x-twocode-token") {
+        if name.eq_ignore_ascii_case("x-lintel-token") {
             given = value.trim();
         } else if name.eq_ignore_ascii_case("content-length") {
             length = value.trim().parse().ok()?;
@@ -202,11 +202,10 @@ fn respond(stream: &mut TcpStream, status: &str, body: &str) {
 
 // ---- ~/.claude/settings.json ----
 
-/// Ours, including what the old Electron TwoCode installed.
+/// Ours, from this version or an earlier one.
 fn is_ours(hook: &Value) -> bool {
     let url = hook["url"].as_str().unwrap_or("");
-    let command = hook["command"].as_str().unwrap_or("");
-    url.starts_with(&format!("http://127.0.0.1:{PORT}{ROUTE}")) || command.contains("twocode-reply")
+    url.starts_with(&format!("http://127.0.0.1:{PORT}{ROUTE}"))
 }
 
 pub fn strip(settings: &mut Value) {
@@ -228,9 +227,6 @@ pub fn strip(settings: &mut Value) {
             settings.as_object_mut().map(|o| o.remove("hooks"));
         }
     }
-    if settings["statusLine"]["command"].as_str().is_some_and(|c| c.contains("twocode-statusline")) {
-        settings.as_object_mut().map(|o| o.remove("statusLine"));
-    }
 }
 
 pub fn add(settings: &mut Value, secret: &str) {
@@ -240,7 +236,7 @@ pub fn add(settings: &mut Value, secret: &str) {
     }
     for event in EVENTS {
         let timeout = if event == "PermissionRequest" { PERMISSION_WAIT_S + 5 } else { 2 };
-        let hook = json!({ "type": "http", "url": hook_url(), "timeout": timeout, "headers": { "X-TwoCode-Token": secret } });
+        let hook = json!({ "type": "http", "url": hook_url(), "timeout": timeout, "headers": { "X-Lintel-Token": secret } });
         let groups = &mut settings["hooks"][event];
         if !groups.is_array() {
             *groups = json!([]);
@@ -254,7 +250,7 @@ pub fn has_current(settings: &Value, secret: &str) -> bool {
         settings["hooks"][event].as_array().is_some_and(|groups| {
             groups.iter().any(|g| {
                 g["hooks"].as_array().is_some_and(|hooks| {
-                    hooks.iter().any(|h| h["url"].as_str() == Some(hook_url().as_str()) && h["headers"]["X-TwoCode-Token"] == secret)
+                    hooks.iter().any(|h| h["url"].as_str() == Some(hook_url().as_str()) && h["headers"]["X-Lintel-Token"] == secret)
                 })
             })
         })
@@ -264,7 +260,7 @@ pub fn has_current(settings: &Value, secret: &str) -> bool {
 // ---- ~/.codex/hooks.json ----
 
 fn codex_command(secret: &str) -> String {
-    format!(r#"curl.exe -s -m 65 -H "X-TwoCode-Token: {secret}" -H "Content-Type: application/json" --data-binary @- "{}&agent=codex""#, hook_url())
+    format!(r#"curl.exe -s -m 65 -H "X-Lintel-Token: {secret}" -H "Content-Type: application/json" --data-binary @- "{}&agent=codex""#, hook_url())
 }
 
 fn is_ours_codex(hook: &Value) -> bool {
@@ -301,7 +297,7 @@ pub fn add_codex(config: &mut Value, secret: &str) {
     if !groups.is_array() {
         *groups = json!([]);
     }
-    let hook = json!({ "type": "command", "command": codex_command(secret), "timeout": 70, "statusMessage": "Waiting for TwoCode" });
+    let hook = json!({ "type": "command", "command": codex_command(secret), "timeout": 70, "statusMessage": "Waiting for Lintel" });
     groups.as_array_mut().map(|g| g.push(json!({ "hooks": [hook] })));
 }
 
@@ -349,7 +345,7 @@ fn write_settings(file: &Path, settings: &Value) -> Result<(), String> {
         fs::create_dir_all(dir).map_err(|e| e.to_string())?;
     }
     if file.exists() {
-        fs::copy(file, file.with_extension("json.twocode-backup")).map_err(|e| e.to_string())?;
+        fs::copy(file, file.with_extension("json.lintel-backup")).map_err(|e| e.to_string())?;
     }
     let temp = file.with_extension("json.tmp");
     fs::write(&temp, text).map_err(|e| e.to_string())?;
@@ -381,11 +377,10 @@ mod tests {
             "statusLine": { "type": "command", "command": "~/.claude/mine.sh" },
             "hooks": {
                 "Stop": [
-                    { "hooks": [{ "type": "http", "url": "http://127.0.0.1:47823/twocode-hook?v=4", "headers": { "X-TwoCode-Token": "old" } }] },
-                    { "hooks": [{ "type": "command", "command": "node \"C:\\Downloads\\twocode-reply.cjs\" old", "asyncRewake": true }] },
+                    { "hooks": [{ "type": "http", "url": "http://127.0.0.1:47823/lintel-hook?v=4", "headers": { "X-Lintel-Token": "old" } }] },
                     { "hooks": [{ "type": "command", "command": "my-own-hook" }] }
                 ],
-                "PreToolUse": [{ "hooks": [{ "type": "http", "url": "http://127.0.0.1:47823/twocode-hook?v=4" }] }]
+                "PreToolUse": [{ "hooks": [{ "type": "http", "url": "http://127.0.0.1:47823/lintel-hook?v=4" }] }]
             }
         })
     }
@@ -416,13 +411,6 @@ mod tests {
     }
 
     #[test]
-    fn an_old_twocode_statusline_goes_but_yours_stays() {
-        let mut s = json!({ "statusLine": { "command": "node twocode-statusline.cjs x" } });
-        strip(&mut s);
-        assert!(s.get("statusLine").is_none());
-    }
-
-    #[test]
     fn codex_hooks_come_and_go_without_touching_yours() {
         let mut c = json!({ "hooks": { "PermissionRequest": [{ "hooks": [{ "type": "command", "command": "mine" }] }], "Stop": [{ "hooks": [{ "type": "command", "command": "other" }] }] } });
         add_codex(&mut c, "secret");
@@ -449,7 +437,7 @@ mod tests {
 
     #[test]
     fn invalid_settings_are_left_alone() {
-        let dir = std::env::temp_dir().join(format!("twocode-hooks-{}", agents::now_ms()));
+        let dir = std::env::temp_dir().join(format!("lintel-hooks-{}", agents::now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let file = dir.join("settings.json");
         fs::write(&file, "{ broken").unwrap();
@@ -460,12 +448,12 @@ mod tests {
 
     #[test]
     fn writing_keeps_a_backup() {
-        let dir = std::env::temp_dir().join(format!("twocode-hooks2-{}", agents::now_ms()));
+        let dir = std::env::temp_dir().join(format!("lintel-hooks2-{}", agents::now_ms()));
         fs::create_dir_all(&dir).unwrap();
         let file = dir.join("settings.json");
         fs::write(&file, "{\"a\":1}").unwrap();
         write_settings(&file, &json!({ "b": 2 })).unwrap();
-        assert_eq!(fs::read_to_string(file.with_extension("json.twocode-backup")).unwrap(), "{\"a\":1}");
+        assert_eq!(fs::read_to_string(file.with_extension("json.lintel-backup")).unwrap(), "{\"a\":1}");
         assert_eq!(read_settings(&file).unwrap()["b"], 2);
         fs::remove_dir_all(dir).unwrap();
     }
@@ -487,7 +475,7 @@ mod tests {
     }
 
     fn post(token: &str, body: &str) -> Vec<u8> {
-        format!("POST {ROUTE}?v=5 HTTP/1.1\r\nx-twocode-token: {token}\r\nContent-Length: {}\r\n\r\n{body}", body.len()).into_bytes()
+        format!("POST {ROUTE}?v=5 HTTP/1.1\r\nx-lintel-token: {token}\r\nContent-Length: {}\r\n\r\n{body}", body.len()).into_bytes()
     }
 
     #[test]

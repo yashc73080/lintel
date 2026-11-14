@@ -1,4 +1,4 @@
-//! Your switches, saved as a small JSON file in %APPDATA%\TwoCode.
+//! Your switches, saved as a small JSON file in %APPDATA%\Lintel.
 use crate::agents::Run;
 use crate::glow::{Motion, Palette, Style};
 use crate::layout::Tab;
@@ -62,13 +62,13 @@ impl Default for Config {
 }
 
 pub fn dir() -> PathBuf {
-    PathBuf::from(std::env::var_os("APPDATA").unwrap_or_default()).join("TwoCode")
+    PathBuf::from(std::env::var_os("APPDATA").unwrap_or_default()).join("Lintel")
 }
 
 /// Problems worth finding later. Kept short: it starts over at 64 KB.
 pub fn log(text: &str) {
     let _ = fs::create_dir_all(dir());
-    let file = dir().join("twocode.log");
+    let file = dir().join("lintel.log");
     if fs::metadata(&file).is_ok_and(|m| m.len() > 64 * 1024) {
         let _ = fs::remove_file(&file);
     }

@@ -1,4 +1,4 @@
-//! Files parked in the notch. Only their paths are kept, in %APPDATA%\TwoCode\shelf.json: nothing is copied or moved.
+//! Files parked in the notch. Only their paths are kept, in %APPDATA%\Lintel\shelf.json: nothing is copied or moved.
 use std::fs;
 use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering};

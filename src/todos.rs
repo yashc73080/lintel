@@ -1,4 +1,4 @@
-//! Your todo list and the one-line editor used to type into it. Saved in %APPDATA%\TwoCode\todos.json.
+//! Your todo list and the one-line editor used to type into it. Saved in %APPDATA%\Lintel\todos.json.
 use serde::{Deserialize, Serialize};
 use std::fs;
 

@@ -818,7 +818,7 @@ fn draw_calendar(g: &mut Gfx, s: &Scene, a: Rect, alpha: f32, hits: &mut Vec<(Re
             draw_pill_button(g, s, "Open folder", Rect { x: x + half + 8.0, w: half, ..wide }, Action::OpenFolder, alpha, hits);
         }
         Phase::SignedOut(why) => {
-            let line = if why.is_empty() { "Read-only: TwoCode can't change events" } else { why.as_str() };
+            let line = if why.is_empty() { "Read-only: Lintel can't change events" } else { why.as_str() };
             draw_page_header(g, Tab::Calendar, "Connect Google Calendar", line, a, alpha);
             draw_pill_button(g, s, "Connect", wide, Action::CalendarConnect, alpha, hits);
         }

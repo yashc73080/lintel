@@ -1,4 +1,4 @@
-//! Brings the notch back when it crashes. Started plainly, twocode.exe becomes a tiny keeper that runs the
+//! Brings the notch back when it crashes. Started plainly, lintel.exe becomes a tiny keeper that runs the
 //! notch as a second copy of itself and starts it again if it dies. Quitting from the tray ends both.
 use std::process::Command;
 use std::time::{Duration, Instant};
@@ -22,7 +22,7 @@ pub fn is_notch() -> bool {
 pub fn run() -> bool {
     unsafe {
         // One keeper is enough: a second start just leaves.
-        let single = CreateMutexW(None, true, w!("Local\\TwoCodeKeeper"));
+        let single = CreateMutexW(None, true, w!("Local\\LintelKeeper"));
         if single.is_err() || GetLastError() == ERROR_ALREADY_EXISTS {
             return true;
         }

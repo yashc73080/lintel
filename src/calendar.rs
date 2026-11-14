@@ -230,7 +230,7 @@ fn post_token(body: &str) -> Option<(u32, String)> {
 
 fn request(host: PCWSTR, method: PCWSTR, path: &str, headers: &str, body: Option<&str>) -> Option<(u32, String)> {
     unsafe {
-        let session = WinHttpOpen(w!("TwoCode"), WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY, PCWSTR::null(), PCWSTR::null(), 0);
+        let session = WinHttpOpen(w!("Lintel"), WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY, PCWSTR::null(), PCWSTR::null(), 0);
         if session.is_null() {
             return None;
         }
@@ -344,7 +344,7 @@ fn wait_for_browser(listener: &TcpListener, state: &str) -> Result<String, Strin
         let n = stream.read(&mut buffer).unwrap_or(0);
         let text = String::from_utf8_lossy(&buffer[..n]).into_owned();
         let answer = answer_from(text.lines().next().unwrap_or(""), state);
-        let page = if answer.is_some() { "You can close this tab and go back to TwoCode." } else { "Not found" };
+        let page = if answer.is_some() { "You can close this tab and go back to Lintel." } else { "Not found" };
         let status = if answer.is_some() { "200 OK" } else { "404 Not Found" };
         let _ = write!(stream, "HTTP/1.1 {status}\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{page}", page.len());
         if let Some(answer) = answer {

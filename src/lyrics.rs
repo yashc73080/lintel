@@ -162,7 +162,7 @@ pub fn encode(text: &str) -> String {
 
 fn get(path: &str) -> Option<String> {
     unsafe {
-        let session = WinHttpOpen(w!("TwoCode (https://github.com/levon-z/TwoCode)"), WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY, PCWSTR::null(), PCWSTR::null(), 0);
+        let session = WinHttpOpen(w!("Lintel (https://github.com/yashc73080/lintel)"), WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY, PCWSTR::null(), PCWSTR::null(), 0);
         if session.is_null() {
             return None;
         }

@@ -18,8 +18,8 @@ use windows::Win32::UI::WindowsAndMessaging::*;
 
 pub const WM_TRAY: u32 = WM_APP + 2;
 const RUN_KEY: PCWSTR = w!("Software\\Microsoft\\Windows\\CurrentVersion\\Run");
-const RUN_VALUE: PCWSTR = w!("TwoCodeNotch");
-const ICON: &[u8] = include_bytes!("../../assets/icon.ico");
+const RUN_VALUE: PCWSTR = w!("LintelNotch");
+const ICON: &[u8] = include_bytes!("../assets/icon.ico");
 
 fn load_icon() -> HICON {
     unsafe {
@@ -41,7 +41,7 @@ fn tray_data(hwnd: HWND) -> NOTIFYICONDATAW {
         hIcon: load_icon(),
         ..Default::default()
     };
-    let tip = format!("TwoCode (build {})", option_env!("TWOCODE_BUILD").unwrap_or("dev"));
+    let tip = format!("Lintel (build {})", option_env!("LINTEL_BUILD").unwrap_or("dev"));
     for (slot, unit) in data.szTip.iter_mut().zip(tip.encode_utf16()) {
         *slot = unit;
     }
@@ -181,7 +181,7 @@ pub fn menu_rows(app: &App) -> Vec<Row> {
     });
     rows.push(switch(ID_FULLSCREEN, "Hide in full screen", c.hide_fullscreen, true, false));
     rows.push(switch(ID_STARTUP, "Start with Windows", starts_with_windows(), true, false));
-    rows.push(Row::Button { id: ID_EXIT, label: "Exit TwoCode".to_string(), enabled: true, danger: true });
+    rows.push(Row::Button { id: ID_EXIT, label: "Exit Lintel".to_string(), enabled: true, danger: true });
     rows
 }
 
@@ -281,7 +281,7 @@ pub fn set_glow_color(app: &mut App, color: u32, save: bool) {
 fn show_error(text: &str) {
     let wide: Vec<u16> = text.encode_utf16().chain(Some(0)).collect();
     unsafe {
-        MessageBoxW(None, PCWSTR(wide.as_ptr()), w!("TwoCode"), MB_OK | MB_ICONWARNING);
+        MessageBoxW(None, PCWSTR(wide.as_ptr()), w!("Lintel"), MB_OK | MB_ICONWARNING);
     }
 }
 
@@ -303,7 +303,7 @@ fn set_starts_with_windows(on: bool) {
     }
 }
 
-/// Puts TwoCode in the Start menu, pointing at this copy, so it can be started again from there.
+/// Puts Lintel in the Start menu, pointing at this copy, so it can be started again from there.
 pub fn keep_start_menu_shortcut() {
     use windows::core::{Interface, HSTRING};
     use windows::Win32::System::Com::{CoCreateInstance, IPersistFile, CLSCTX_INPROC_SERVER};
@@ -322,13 +322,13 @@ pub fn keep_start_menu_shortcut() {
             if let Some(folder) = exe.parent() {
                 link.SetWorkingDirectory(&HSTRING::from(folder.as_os_str()))?;
             }
-            link.SetDescription(w!("The TwoCode notch"))?;
+            link.SetDescription(w!("The Lintel notch"))?;
             link.SetIconLocation(&HSTRING::from(icon.as_os_str()), 0)?;
-            link.cast::<IPersistFile>()?.Save(&HSTRING::from(programs.join("TwoCode.lnk").as_os_str()), true)
+            link.cast::<IPersistFile>()?.Save(&HSTRING::from(programs.join("Lintel.lnk").as_os_str()), true)
         })()
     };
     if let Err(why) = saved {
-        crate::config::log(&format!("could not add TwoCode to the Start menu: {why}"));
+        crate::config::log(&format!("could not add Lintel to the Start menu: {why}"));
     }
 }
 

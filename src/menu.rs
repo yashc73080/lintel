@@ -217,8 +217,8 @@ impl Menu {
         g.clip(Rect { x: panel.x + 1.0, y: panel.y + 1.0, w: panel.w - 2.0, h: panel.h - 2.0 });
         let (x, w) = (panel.x + GAP, panel.w - GAP * 2.0);
         let top = panel.y - scroll;
-        g.text("TwoCode", Rect { x: x + 8.0, y: top + 8.0, w: 120.0, h: 24.0 }, 14.0, true, Align::Left, WHITE, 1.0);
-        let build = format!("build {}", option_env!("TWOCODE_BUILD").unwrap_or("dev"));
+        g.text("Lintel", Rect { x: x + 8.0, y: top + 8.0, w: 120.0, h: 24.0 }, 14.0, true, Align::Left, WHITE, 1.0);
+        let build = format!("build {}", option_env!("LINTEL_BUILD").unwrap_or("dev"));
         g.text(&build, Rect { x: x + w - 108.0, y: top + 8.0, w: 100.0, h: 24.0 }, 10.5, false, Align::Right, FAINT, 1.0);
         let mut y = top + TITLE_H;
         for (i, row) in rows.iter().enumerate() {
@@ -596,7 +596,7 @@ pub fn open(app: &mut App, from_notch: bool) {
         return;
     }
     static REGISTER: Once = Once::new();
-    let class = w!("TwoCodeMenu");
+    let class = w!("LintelMenu");
     unsafe {
         let Ok(instance) = GetModuleHandleW(PCWSTR::null()) else { return };
         REGISTER.call_once(|| {
@@ -625,7 +625,7 @@ pub fn open(app: &mut App, from_notch: bool) {
         let margin = (MARGIN * scale) as i32;
         let (w, h) = (panel.0 + margin * 2, panel.1 + margin * 2);
         let style = WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOREDIRECTIONBITMAP;
-        let Ok(hwnd) = CreateWindowExW(style, class, w!("TwoCode settings"), WS_POPUP, px - margin, py - margin, w, h, None, None, Some(instance.into()), None) else { return };
+        let Ok(hwnd) = CreateWindowExW(style, class, w!("Lintel settings"), WS_POPUP, px - margin, py - margin, w, h, None, None, Some(instance.into()), None) else { return };
         let gfx = match Gfx::new(hwnd, w as u32, h as u32, scale) {
             Ok(gfx) => Some(gfx),
             Err(why) => {
