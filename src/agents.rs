@@ -342,6 +342,18 @@ impl SessionView {
             Status::Idle => "Stopped".to_string(),
         }
     }
+
+    /// The status with the session's running time, unless the status already
+    /// names a time ("Quiet for 8m 44s"), so the time never shows twice.
+    pub fn status_line(&self) -> String {
+        let status = self.status_text();
+        let names_time = self.status == Status::Running && self.quiet_s >= QUIET_S && self.repeated_error.is_none();
+        if self.elapsed_s > 0 && !names_time {
+            format!("{status} · {}", crate::layout::elapsed(self.elapsed_s))
+        } else {
+            status
+        }
+    }
 }
 
 #[derive(Default)]
@@ -1118,6 +1130,7 @@ mod tests {
         hub.apply(Agent::Claude, "s", NOW - 45_000, Event::Turn, NOW);
         assert!(seen(&hub).is_quiet());
         assert_eq!(seen(&hub).status_text(), "Quiet for 45s");
+        assert!(!seen(&hub).status_line().contains('·'), "the quiet time should show once");
     }
 
     #[test]

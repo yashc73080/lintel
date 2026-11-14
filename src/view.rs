@@ -617,7 +617,7 @@ fn draw_list(g: &mut Gfx, s: &Scene, a: Rect, alpha: f32, hits: &mut Vec<(Rect, 
     let (name, tint) = brand(v.agent);
     g.circle(x + 4.0, 17.0, 4.0, state_color(v), alpha);
     g.text(name, Rect { x: x + 14.0, y: 8.0, w: 44.0, h: 18.0 }, 11.5, true, Align::Left, tint, alpha);
-    let status = if v.elapsed_s > 0 { format!("{} · {}", v.status_text(), layout::elapsed(v.elapsed_s)) } else { v.status_text() };
+    let status = v.status_line();
     g.text(&v.project, Rect { x: x + 58.0, y: 8.0, w: w - 58.0 - 136.0, h: 18.0 }, 12.0, true, Align::Left, WHITE, alpha);
     g.text(&status, Rect { x: x + w - 136.0, y: 8.0, w: 136.0, h: 18.0 }, 11.0, true, Align::Right, state_color(v), alpha);
     g.text(&v.prompt, Rect { x, y: 26.0, w, h: 16.0 }, 11.0, false, Align::Left, MUTED, alpha);
@@ -873,7 +873,7 @@ fn draw_session(g: &mut Gfx, s: &Scene, v: &SessionView, a: Rect, alpha: f32, hi
     hits.push((back, Action::Back));
     let (name, tint) = brand(v.agent);
     g.text(name, Rect { x: x + 24.0, y: 8.0, w: 44.0, h: 20.0 }, 11.5, true, Align::Left, tint, alpha);
-    let status = if v.elapsed_s > 0 { format!("{} · {}", v.status_text(), layout::elapsed(v.elapsed_s)) } else { v.status_text() };
+    let status = v.status_line();
     let (status_w, open_w) = (150.0, 46.0);
     let jump = Action::Jump(v.agent, v.id.clone());
     let open_r = Rect { x: x + w - open_w, y: 8.0, w: open_w, h: 20.0 };

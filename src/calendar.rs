@@ -418,7 +418,7 @@ fn fetch_events(access: &str) -> Option<Vec<Event>> {
         }
         let Some(id) = calendar["id"].as_str() else { continue };
         let path = format!(
-            "/calendar/v3/calendars/{}/events?singleEvents=true&orderBy=startTime&maxResults=20&timeMin={}&timeMax={}&fields=items(summary,status,htmlLink,hangoutLink,start,end,attendees(self,responseStatus),conferenceData(entryPoints(entryPointType,uri)))",
+            "/calendar/v3/calendars/{}/events?singleEvents=true&orderBy=startTime&maxResults=20&timeMin={}&timeMax={}&fields=items(summary,status,eventType,htmlLink,hangoutLink,start,end,attendees(self,responseStatus),conferenceData(entryPoints(entryPointType,uri)))",
             encode(id),
             encode(&from),
             encode(&to)
@@ -439,7 +439,8 @@ fn https(url: Option<&str>) -> Option<String> {
 }
 
 fn parse_event(item: &Value) -> Option<Event> {
-    if item["status"] == "cancelled" {
+    // Working-location entries ("Home", "Office") are not meetings.
+    if item["status"] == "cancelled" || item["eventType"] == "workingLocation" {
         return None;
     }
     let declined = item["attendees"].as_array().is_some_and(|list| list.iter().any(|a| a["self"] == Value::Bool(true) && a["responseStatus"] == "declined"));
